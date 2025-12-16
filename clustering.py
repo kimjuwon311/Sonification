@@ -7,7 +7,7 @@ import json
 # =========================
 # 1. 이미지 로드
 # =========================
-img_path = r"C:\Users\sk926\Downloads\stanley-park-4539852_1280.jpg"
+img_path = r"C:\Python Project_Folders\bichek\stanley-park-4539852_1280.jpg"
 img = cv2.cvtColor(np.array(Image.open(img_path).convert("RGB")), cv2.COLOR_RGB2BGR)
 h, w = img.shape[:2]
 
@@ -50,3 +50,4 @@ with open("image_clusters_full.json", "w") as f:
 
 print("✅ 클러스터링 완료, image_clusters_full.json 생성됨")
 print(f"클러스터 개수: {n_clusters}")
+
