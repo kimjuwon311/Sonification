@@ -2,19 +2,12 @@ import torch
 import clip
 from PIL import Image
 
-# 1️⃣ 디바이스 설정
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# 2️⃣ CLIP 모델 로드 (가볍고 안정적인 버전)
 model, preprocess = clip.load("ViT-B/32", device=device)
 
-# 3️⃣ 이미지 로드
-image = preprocess(
-    Image.open(r"C:\Users\sk926\Downloads\stanley-park-4539852_1280.jpg").convert("RGB")
-).unsqueeze(0).to(device)
+IMAGE_PATH = r"C:\Python Project_Folders\bichek\stanley-park-4539852_1280.jpg"
 
-# 4️⃣ 감정 텍스트 후보
-emotion_texts = [
+EMOTION_TEXTS = [
     "a calm image",
     "a peaceful image",
     "a gloomy image",
@@ -25,24 +18,25 @@ emotion_texts = [
     "a warm image"
 ]
 
-text_tokens = clip.tokenize(emotion_texts).to(device)
+EMOTION_KEYS = [e.replace("a ", "").replace(" image", "") for e in EMOTION_TEXTS]
 
-# 5️⃣ 특징 추출 & 유사도 계산
-with torch.no_grad():
-    image_features = model.encode_image(image)
-    text_features = model.encode_text(text_tokens)
+def get_clip_emotions(image_path=IMAGE_PATH):
+    """이미지를 CLIP에 넣어 각 감정별 강도를 dict로 반환"""
+    image = preprocess(Image.open(image_path).convert("RGB")).unsqueeze(0).to(device)
+    text_tokens = clip.tokenize(EMOTION_TEXTS).to(device)
 
-    # cosine similarity
-    similarity = (image_features @ text_features.T).softmax(dim=-1)
+    with torch.no_grad():
+        img_f = model.encode_image(image)
+        txt_f = model.encode_text(text_tokens)
+        sims = (img_f @ txt_f.T).softmax(dim=-1)[0]
 
-# 6️⃣ 결과 출력
-print("=== Emotion Similarity Scores ===")
-for emotion, score in zip(emotion_texts, similarity[0]):
-    print(f"{emotion:20s}: {score.item():.3f}")
+    # 감정별 강도를 명시적으로 0~1 값으로 반환
+    emotions_with_strength = {k: float(v) for k, v in zip(EMOTION_KEYS, sims.tolist())}
+    return emotions_with_strength
 
-scores = list(zip(emotion_texts, similarity[0].tolist()))
-scores.sort(key=lambda x: x[1], reverse=True)
-
-summary = ", ".join([e.replace("a ", "").replace(" image", "") for e, _ in scores[:3]])
-print("Emotion Summary:", summary)
+# 예시 실행
+if __name__ == "__main__":
+    emotions = get_clip_emotions()
+    for k,v in emotions.items():
+        print(f"{k:10s}: {v:.3f}")
 
