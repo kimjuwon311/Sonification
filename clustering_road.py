@@ -9,7 +9,7 @@ with open("image_clusters_full.json") as f:
     cluster_data = json.load(f)
 
 # 이미지 로드
-img_path = r"C:\Users\sk926\Downloads\stanley-park-4539852_1280.jpg"
+img_path = r"C:\Python Project_Folders\bichek\stanley-park-4539852_1280.jpg"
 img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
 h, w, _ = img.shape
 
@@ -53,4 +53,5 @@ def on_hover(sel):
 
 plt.axis('off')
 plt.show()
+
 
